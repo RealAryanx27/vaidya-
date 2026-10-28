@@ -1,0 +1,22 @@
+{
+  "name": "akesa-ai",
+  "private": true,
+  "version": "2.0.0",
+  "description": "AKESA AI Healthcare Navigation Assistant & Blood Bank Directory (Lucknow Edition)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test_backend.js"
+  },
+  "keywords": [
+    "healthcare",
+    "ai",
+    "gemini",
+    "opd-navigation",
+    "blood-bank",
+    "lucknow",
+    "accessibility"
+  ],
+  "author": "AKESA Team",
+  "license": "MIT"
+}

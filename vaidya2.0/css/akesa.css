@@ -1,0 +1,294 @@
+/* ==========================================================================
+   AKESA AI Healthcare Assistant — Futuristic Space Healthcare UI Styling
+   ========================================================================== */
+
+:root {
+  --color-bg-space: #070b14;
+  --color-bg-space-darker: #04070e;
+  --color-cyan-glow: rgba(6, 182, 212, 0.4);
+  --color-mint-glow: rgba(16, 185, 129, 0.35);
+  --color-rose-glow: rgba(244, 63, 94, 0.45);
+  --font-zoom-scale: 1;
+}
+
+/* Base Body & Space Background */
+body {
+  background-color: var(--color-bg-space);
+  color: #f1f5f9;
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Subtle Animated Cosmos Background */
+.space-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background: 
+    radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.10) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(14, 116, 144, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #050811 0%, #080e1c 50%, #050811 100%);
+}
+
+/* Starfield twinkles */
+.space-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 150px 80px, #a5f3fc, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 300px 180px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 450px 60px, #67e8f9, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 600px 220px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 780px 140px, #a5f3fc, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 950px 280px, #ffffff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 1100px 90px, #67e8f9, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 550px 550px;
+  opacity: 0.35;
+  animation: starTwinkle 8s infinite alternate ease-in-out;
+}
+
+@keyframes starTwinkle {
+  0% { opacity: 0.25; }
+  50% { opacity: 0.45; }
+  100% { opacity: 0.25; }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0891b2;
+}
+
+/* Futuristic Glass Cards */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.42);
+}
+
+.glass-panel-elevated {
+  background: rgba(15, 23, 42, 0.90);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(6, 182, 212, 0.32);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.55), 0 0 20px -2px rgba(6, 182, 212, 0.18);
+}
+
+.glass-input {
+  background: rgba(11, 19, 38, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #f8fafc;
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+.glass-input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 16px -2px rgba(56, 189, 248, 0.35);
+  outline: none;
+}
+
+/* Luminous Glows */
+.glow-cyan {
+  box-shadow: 0 0 24px -2px rgba(6, 182, 212, 0.45);
+}
+.glow-mint {
+  box-shadow: 0 0 24px -2px rgba(16, 185, 129, 0.4);
+}
+.glow-rose {
+  box-shadow: 0 0 28px -2px rgba(244, 63, 94, 0.5);
+}
+.glow-amber {
+  box-shadow: 0 0 24px -2px rgba(245, 158, 11, 0.4);
+}
+
+/* Floating Animations */
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+.animate-float {
+  animation: floatGentle 3.5s ease-in-out infinite;
+}
+
+@keyframes beaconPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; filter: drop-shadow(0 0 4px #06b6d4); }
+  50% { transform: scale(1.25); opacity: 1; filter: drop-shadow(0 0 14px #22d3ee); }
+}
+.animate-beacon {
+  animation: beaconPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes mouthTalk {
+  0% { transform: scaleY(0.7); }
+  100% { transform: scaleY(1.4); }
+}
+.mouth-talking {
+  transform-origin: 120px 105px;
+  animation: mouthTalk 0.22s infinite alternate ease-in-out;
+}
+
+@keyframes waveBarAnim {
+  0% { height: 4px; }
+  100% { height: 26px; }
+}
+.eq-bar {
+  animation: waveBarAnim 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes ecgPulse {
+  0% { opacity: 0.35; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.15); filter: drop-shadow(0 0 8px #ef4444); }
+  100% { opacity: 0.35; transform: scale(0.95); }
+}
+.ecg-pulse {
+  animation: ecgPulse 1.8s infinite ease-in-out;
+}
+
+/* Patient Accessibility Font Zoom Settings */
+body.patient-text-sm {
+  font-size: 14px;
+}
+body.patient-text-base {
+  font-size: 16px;
+}
+body.patient-text-lg {
+  font-size: 18px;
+}
+body.patient-text-xl {
+  font-size: 20px;
+}
+
+body.patient-text-lg .text-xs,
+body.patient-text-xl .text-xs {
+  font-size: 14px !important;
+}
+body.patient-text-lg .text-sm,
+body.patient-text-xl .text-sm {
+  font-size: 16px !important;
+}
+
+/* High Contrast Accessibility Mode */
+body.high-contrast-mode {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+body.high-contrast-mode .glass-panel,
+body.high-contrast-mode .glass-panel-elevated {
+  background: #000000 !important;
+  border: 2px solid #38bdf8 !important;
+  box-shadow: none !important;
+}
+body.high-contrast-mode .text-slate-400,
+body.high-contrast-mode .text-slate-500,
+body.high-contrast-mode .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+body.high-contrast-mode button,
+body.high-contrast-mode input,
+body.high-contrast-mode select {
+  border: 2px solid #ffffff !important;
+}
+
+/* Clean Light Mode Alternative */
+body.theme-light {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+body.theme-light .space-backdrop {
+  background: 
+    radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.08) 0%, transparent 45%),
+    linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+}
+body.theme-light .glass-panel {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(203, 213, 225, 0.9) !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08) !important;
+}
+body.theme-light .glass-panel-elevated {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  color: #0f172a !important;
+}
+body.theme-light .glass-input {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+body.theme-light .text-white {
+  color: #0f172a !important;
+}
+body.theme-light .text-slate-100,
+body.theme-light .text-slate-200,
+body.theme-light .text-slate-300 {
+  color: #1e293b !important;
+}
+body.theme-light .text-slate-400 {
+  color: #475569 !important;
+}
+body.theme-light .bg-slate-900,
+body.theme-light .bg-slate-800 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print Layout for Digital OPD Pass */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  header, nav, footer, #view-chat, #view-helpline, #view-hospitals, #view-bloodbank, #view-admin, #floating-robot-btn, .no-print {
+    display: none !important;
+  }
+  #pass-modal {
+    display: block !important;
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  #pass-modal-inner {
+    border: 2px solid #000000 !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}

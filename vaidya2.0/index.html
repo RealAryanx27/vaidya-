@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AKESA AI | Healthcare Navigation Assistant (आकेसा डॉक्टर रोबोट)</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖🩺</text></svg>" />
+
+  <!-- Google Fonts: Plus Jakarta Sans, Noto Sans Devanagari & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Noto Sans Devanagari"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            akesa: {
+              50: '#ecfeff',
+              100: '#cffafe',
+              200: '#a5f3fc',
+              300: '#67e8f9',
+              400: '#22d3ee',
+              500: '#06b6d4',
+              600: '#0891b2',
+              700: '#0e7490',
+              800: '#155e75',
+              900: '#164e63',
+              950: '#083344',
+            },
+            mint: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- External Libraries: Canvas Confetti & QRCode.js -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Futuristic Space UI Styling -->
+  <link rel="stylesheet" href="css/akesa.css" />
+</head>
+<body class="patient-text-base antialiased min-h-screen flex flex-col relative">
+
+  <!-- Space Cosmos Ambient Background -->
+  <div class="space-backdrop">
+    <div class="space-stars"></div>
+  </div>
+
+  <!-- STICKY FUTURISTIC HEADER -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-xl border-b border-cyan-500/20 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Top Row: Logo, Locality & Controls -->
+      <div class="flex items-center justify-between h-16 gap-3">
+        
+        <!-- Brand & Mascot Identity -->
+        <div class="flex items-center gap-3">
+          <div class="relative w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 to-emerald-500 p-0.5 shadow-md shadow-cyan-500/30 flex items-center justify-center cursor-pointer" onclick="app.mascot.react()" title="Click Dr. Akesa!">
+            <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-lg">
+              🤖
+            </div>
+            <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-slate-950 animate-pulse"></span>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
+                AKESA <span class="text-cyan-400 font-normal">AI</span>
+              </span>
+              <span id="ai-backend-badge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-950/90 text-cyan-300 border border-cyan-500/30">
+                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                <span>Connecting...</span>
+              </span>
+            </div>
+            <p class="text-[10px] text-slate-400 font-medium hidden sm:block">
+              Healthcare Navigation & OPD Assistant • Lucknow Edition
+            </p>
+          </div>
+        </div>
+
+        <!-- Locality Switcher & Accessibility Toolbar -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          
+          <!-- Locality Selector Pill -->
+          <button onclick="app.openLocalityModal()" class="px-2.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-xs text-slate-200 border border-slate-700/80 hover:border-cyan-400 flex items-center gap-1.5 transition-colors" title="Change Lucknow Location">
+            <span class="text-cyan-400">📍</span>
+            <span id="current-locality-display" class="font-bold truncate max-w-[110px] sm:max-w-[150px]">Hazratganj</span>
+            <span class="text-[10px] text-slate-400">▼</span>
+          </button>
+
+          <!-- Accessibility Toolbar -->
+          <div class="hidden lg:flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/80 border border-slate-800">
+            <!-- Text Zoom -->
+            <button onclick="app.setFontSize('sm')" id="font-btn-sm" class="px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-white" title="Small Text">A-</button>
+            <button onclick="app.setFontSize('base')" id="font-btn-base" class="px-2 py-0.5 rounded text-xs font-bold bg-cyan-500 text-slate-950" title="Normal Text">A</button>
+            <button onclick="app.setFontSize('lg')" id="font-btn-lg" class="px-2 py-0.5 rounded text-xs font-semibold text-slate-400 hover:text-white" title="Large Text (Elderly)">A+</button>
+            
+            <div class="w-px h-4 bg-slate-700 mx-1"></div>
+
+            <!-- High Contrast -->
+            <button onclick="app.toggleHighContrast()" id="contrast-toggle-btn" class="px-2 py-0.5 rounded text-xs text-slate-300 hover:text-white flex items-center gap-1" title="High Contrast Mode">
+              <span>👁️</span><span class="text-[11px]">Contrast</span>
+            </button>
+
+            <!-- Theme Toggle -->
+            <button onclick="app.toggleTheme()" id="theme-toggle-btn" class="px-2 py-0.5 rounded text-xs text-slate-300 hover:text-white" title="Toggle Space/Light Theme">
+              <span id="theme-toggle-icon">🌌</span>
+            </button>
+          </div>
+
+          <!-- Voice & Tone Settings -->
+          <div class="hidden sm:flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-slate-800">
+            <button onclick="app.toggleVoiceNarration()" id="voice-narration-btn" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-cyan-300 hover:bg-slate-800 flex items-center gap-1.5 transition-colors" title="AI Voice Narration">
+              <span>🔊</span>
+              <span id="voice-narration-text">Voice: ON</span>
+            </button>
+            <button onclick="app.setVoiceTone(app.sound.voiceTone === 'sweet' ? 'slow' : (app.sound.voiceTone === 'slow' ? 'standard' : 'sweet'))" class="px-2 py-1 rounded-lg text-[11px] font-semibold text-amber-300 hover:bg-slate-800 transition-colors" title="Click to change Voice Tone">
+              <span id="voice-tone-text">🌸 Sweet</span>
+            </button>
+          </div>
+
+          <!-- Language Switcher -->
+          <div class="flex items-center p-1 rounded-xl bg-slate-900/90 border border-slate-800 text-xs">
+            <button onclick="app.setLanguage('en')" id="lang-btn-en" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 shadow-sm transition-all">EN</button>
+            <button onclick="app.setLanguage('hi')" id="lang-btn-hi" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-all">हिन्दी</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Bottom Row: Navigation Tabs (Desktop) -->
+      <nav class="hidden md:flex items-center gap-2 py-2 border-t border-slate-900">
+        <button onclick="app.switchTab('chat')" id="tab-btn-chat" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 shadow-md shadow-cyan-500/25">
+          <span>🤖</span>
+          <span data-en="Dr. Robot AI Guidance" data-hi="डॉक्टर रोबोट AI मार्गदर्शन">Dr. Robot AI Guidance</span>
+        </button>
+
+        <button onclick="app.switchTab('bloodbank')" id="tab-btn-bloodbank" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800/60">
+          <span>🩸</span>
+          <span data-en="Blood Bank & Donors" data-hi="रक्त कोष एवं डोनर">Blood Bank & Donors</span>
+        </button>
+
+        <button onclick="app.switchTab('helpline')" id="tab-btn-helpline" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800/60">
+          <span>📞</span>
+          <span data-en="1800 Voice Helpline" data-hi="1800 वॉयस हेल्पलाइन">1800 Voice Helpline</span>
+        </button>
+
+        <button onclick="app.switchTab('hospitals')" id="tab-btn-hospitals" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800/60">
+          <span>🏥</span>
+          <span data-en="Lucknow Hospitals" data-hi="लखनऊ अस्पताल">Lucknow Hospitals</span>
+        </button>
+
+        <button onclick="app.switchTab('admin')" id="tab-btn-admin" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800/60">
+          <span>📋</span>
+          <span data-en="Reception & Queue" data-hi="रिसेप्शन एवं कतार">Reception & Queue</span>
+        </button>
+      </nav>
+
+    </div>
+
+    <!-- Mobile Navigation Tab Bar -->
+    <div class="md:hidden flex items-center justify-around border-t border-slate-900 bg-slate-950/95 px-2">
+      <button onclick="app.switchTab('chat')" id="mob-tab-chat" class="flex-1 py-2 text-center text-[10px] font-bold text-cyan-400 border-b-2 border-cyan-400 flex flex-col items-center gap-0.5">
+        <span class="text-base">🤖</span><span>Guidance</span>
+      </button>
+      <button onclick="app.switchTab('bloodbank')" id="mob-tab-bloodbank" class="flex-1 py-2 text-center text-[10px] font-medium text-slate-400 flex flex-col items-center gap-0.5">
+        <span class="text-base">🩸</span><span>Blood Bank</span>
+      </button>
+      <button onclick="app.switchTab('helpline')" id="mob-tab-helpline" class="flex-1 py-2 text-center text-[10px] font-medium text-slate-400 flex flex-col items-center gap-0.5">
+        <span class="text-base">📞</span><span>1800 Call</span>
+      </button>
+      <button onclick="app.switchTab('hospitals')" id="mob-tab-hospitals" class="flex-1 py-2 text-center text-[10px] font-medium text-slate-400 flex flex-col items-center gap-0.5">
+        <span class="text-base">🏥</span><span>Hospitals</span>
+      </button>
+      <button onclick="app.switchTab('admin')" id="mob-tab-admin" class="flex-1 py-2 text-center text-[10px] font-medium text-slate-400 flex flex-col items-center gap-0.5">
+        <span class="text-base">📋</span><span>Queue</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 z-10 relative">
+
+    <!-- ============================================================== -->
+    <!-- VIEW 1: DR. AKESA AI ROBOT CHAT & TRIAGE -->
+    <!-- ============================================================== -->
+    <div id="view-chat" class="view-panel transition-opacity duration-300">
+      
+      <!-- Top Grid: Mascot Column + Chat Conversation Area -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- MASCOT LEFT COLUMN (Interactive Dr. Akesa SVG) -->
+        <div class="lg:col-span-4 flex flex-col items-center">
+          <div class="glass-panel rounded-3xl p-6 w-full text-center relative overflow-hidden group">
+            
+            <!-- Ambient Glow Behind Mascot -->
+            <div class="absolute -top-16 -left-16 w-52 h-52 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-16 -right-16 w-52 h-52 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- SVG DR. ROBOT -->
+            <div class="relative py-2 flex flex-col items-center justify-center cursor-pointer" onclick="app.mascot.react()" title="Click Dr. Akesa to speak!">
+              <div id="robot-mascot-container" class="relative animate-float transition-transform duration-300 group-hover:scale-105">
+                
+                <svg id="dr-akesa-svg" class="w-44 h-44 sm:w-52 sm:h-52 drop-shadow-2xl" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="chassisGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#ffffff" />
+                      <stop offset="60%" stop-color="#f0f9ff" />
+                      <stop offset="100%" stop-color="#e0f2fe" />
+                    </linearGradient>
+                    <linearGradient id="visorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#050811" />
+                      <stop offset="100%" stop-color="#0f172a" />
+                    </linearGradient>
+                    <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                  </defs>
+
+                  <!-- Shadow -->
+                  <ellipse cx="120" cy="225" rx="55" ry="10" fill="#000000" opacity="0.4" />
+
+                  <!-- Antenna with Blinking Beacon -->
+                  <path d="M 120 40 L 120 18" stroke="#64748b" stroke-width="4.5" stroke-linecap="round"/>
+                  <circle id="antenna-beacon" cx="120" cy="14" r="9" fill="#06b6d4" class="animate-beacon" filter="url(#glowFilter)"/>
+                  <circle cx="120" cy="14" r="4.5" fill="#ffffff" />
+
+                  <!-- Auditory Sensors / Ears -->
+                  <rect x="36" y="70" width="12" height="28" rx="6" fill="#0891b2" />
+                  <circle cx="42" cy="84" r="3" fill="#38bdf8" />
+                  <rect x="192" y="70" width="12" height="28" rx="6" fill="#0891b2" />
+                  <circle cx="198" cy="84" r="3" fill="#38bdf8" />
+
+                  <!-- Head Chassis -->
+                  <rect x="44" y="38" width="152" height="96" rx="36" fill="url(#chassisGrad)" stroke="#cbd5e1" stroke-width="2.5"/>
+                  
+                  <!-- Doctor Forehead Mirror -->
+                  <circle cx="120" cy="40" r="14" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2.5"/>
+                  <circle cx="120" cy="40" r="8" fill="#38bdf8" filter="url(#glowFilter)"/>
+                  <circle cx="118" cy="38" r="2.5" fill="#ffffff"/>
+
+                  <!-- Visor Screen -->
+                  <rect x="58" y="56" width="124" height="64" rx="22" fill="url(#visorGrad)" stroke="#38bdf8" stroke-width="1.8"/>
+
+                  <!-- Eyes -->
+                  <g id="robot-eyes">
+                    <rect x="80" y="72" width="22" height="26" rx="9" fill="#38bdf8" filter="url(#glowFilter)"/>
+                    <circle cx="85" cy="78" r="3" fill="#ffffff"/>
+                    <rect x="138" y="72" width="22" height="26" rx="9" fill="#38bdf8" filter="url(#glowFilter)"/>
+                    <circle cx="143" cy="78" r="3" fill="#ffffff"/>
+                    <ellipse cx="74" cy="98" rx="6" ry="3.5" fill="#f43f5e" opacity="0.4"/>
+                    <ellipse cx="166" cy="98" rx="6" ry="3.5" fill="#f43f5e" opacity="0.4"/>
+                  </g>
+
+                  <!-- Sound Wave Bars on Visor (Visible during speech) -->
+                  <g id="visor-speech-waves" class="opacity-0 transition-opacity duration-300">
+                    <line x1="90" y1="102" x2="90" y2="108" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" class="eq-bar"/>
+                    <line x1="96" y1="100" x2="96" y2="110" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" class="eq-bar" style="animation-delay: 0.1s"/>
+                    <line x1="102" y1="98" x2="102" y2="112" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" class="eq-bar" style="animation-delay: 0.2s"/>
+                    <line x1="138" y1="98" x2="138" y2="112" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" class="eq-bar" style="animation-delay: 0.15s"/>
+                    <line x1="144" y1="100" x2="144" y2="110" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" class="eq-bar" style="animation-delay: 0.25s"/>
+                    <line x1="150" y1="102" x2="150" y2="108" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" class="eq-bar"/>
+                  </g>
+
+                  <!-- Mouth (Speaks!) -->
+                  <path id="robot-mouth" d="M 112 104 Q 120 110 128 104" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+                  <!-- Torso & Doctor Coat -->
+                  <rect x="100" y="132" width="40" height="12" rx="4" fill="#94a3b8" />
+                  <path d="M 60 144 C 60 144, 76 142, 120 142 C 164 142, 180 144, 180 144 C 188 152, 192 195, 184 206 C 172 216, 68 216, 56 206 C 48 195, 52 152, 60 144 Z" fill="url(#chassisGrad)" stroke="#cbd5e1" stroke-width="2.5"/>
+                  <path d="M 100 143 L 120 178 L 140 143 Z" fill="#0891b2" />
+                  <path d="M 72 144 L 105 186 L 94 212 L 62 206 Z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+                  <path d="M 168 144 L 135 186 L 146 212 L 178 206 Z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+
+                  <!-- Stethoscope & Red Heart Sensor -->
+                  <path d="M 78 150 C 78 192, 162 192, 162 150" stroke="#0e7490" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+                  <circle cx="120" cy="192" r="11" fill="#0f172a" stroke="#cbd5e1" stroke-width="2"/>
+                  <circle cx="120" cy="192" r="6" fill="#ef4444" class="ecg-pulse" filter="url(#glowFilter)"/>
+
+                  <!-- Hands -->
+                  <ellipse cx="40" cy="168" rx="12" ry="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                  <ellipse cx="200" cy="168" rx="12" ry="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+                </svg>
+
+              </div>
+            </div>
+
+            <!-- Mascot Status Pill -->
+            <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-cyan-500/30 text-xs text-slate-300">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span id="mascot-mood-text">Ready to Guide</span>
+              <span id="mascot-mood-icon">🩺</span>
+            </div>
+
+            <!-- Speech Bubble -->
+            <div id="robot-speech-bubble" class="mt-4 px-4 py-3 bg-gradient-to-r from-cyan-950/80 to-slate-900/90 rounded-2xl border border-cyan-500/30 text-xs text-cyan-200 leading-relaxed text-center relative shadow-md">
+              <span id="mascot-speech-text">
+                "नमस्ते! मैं डॉक्टर आकेसा हूँ। लखनऊ के किसी भी अस्पताल या विभाग की जानकारी के लिए मुझसे पूछें!"
+              </span>
+              <div id="bubble-speech-bar" class="hidden mt-2 pt-2 border-t border-cyan-900/60 flex items-center justify-center gap-2 text-[10px] text-cyan-300">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                <span>Speaking with sweet voice...</span>
+                <button onclick="event.stopPropagation(); app.sound.stopSpeaking()" class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:text-white">⏹ Stop</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CHAT CONVERSATION AREA (Right Column) -->
+        <div class="lg:col-span-8 flex flex-col h-[650px] glass-panel rounded-3xl p-4 sm:p-6 border border-cyan-500/20 shadow-xl relative">
+          
+          <!-- Suggested Question Chips Bar -->
+          <div class="mb-4">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+              ✦ Quick Health & Hospital Queries:
+            </span>
+            <div id="symptom-chips-container" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <!-- Dynamically populated chips -->
+            </div>
+          </div>
+
+          <!-- Chat Messages Scroll Area -->
+          <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 pr-1">
+            <!-- Initial Akesa Welcome Message -->
+            <div class="flex gap-3 justify-start animate-in fade-in duration-200">
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-600 to-emerald-500 text-white flex items-center justify-center text-sm shadow-md flex-shrink-0 mt-1">
+                🤖
+              </div>
+              <div class="max-w-xl space-y-2">
+                <div class="glass-panel-elevated rounded-2xl rounded-tl-xs p-4 text-xs sm:text-sm text-slate-100">
+                  <div class="flex items-center justify-between mb-2 pb-1 border-b border-cyan-500/20">
+                    <span class="font-bold text-cyan-300 text-xs">Dr. Akesa M.D. (AI) • Lucknow Navigation</span>
+                    <button onclick="app.speakMessageText('welcome-msg')" class="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 text-[10px] border border-cyan-800">
+                      🔊 Listen
+                    </button>
+                  </div>
+                  <p id="welcome-msg" class="leading-relaxed">
+                    Hello! I am Dr. Akesa, your AI Healthcare Navigation Assistant for Lucknow hospitals (KGMU, RMLIMS, Balrampur, SGPGIMS, SPM Civil). Tell me your symptoms, ask for OPD rooms, or check 24x7 blood bank availability!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chat Input Form & Voice Controls -->
+          <form onsubmit="app.handleChatSubmit(event)" class="mt-4 pt-3 border-t border-slate-800 flex items-center gap-2">
+            <input 
+              type="text" 
+              id="chat-user-input" 
+              class="flex-1 glass-input rounded-2xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none"
+              placeholder="Describe your health issue or ask e.g. 'Where is Cardiology at KGMU?'..."
+              autocomplete="off"
+            />
+
+            <!-- Voice Mic Input -->
+            <button 
+              type="button" 
+              id="chat-mic-btn"
+              onclick="app.toggleVoiceInput()"
+              class="w-11 h-11 rounded-2xl bg-slate-900 border border-cyan-500/30 hover:border-cyan-400 text-cyan-300 flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
+              title="Speak to Dr. Akesa (Voice Input)"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+              </svg>
+            </button>
+
+            <!-- Send Button -->
+            <button 
+              type="submit" 
+              class="h-11 px-5 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0"
+            >
+              <span>Send</span>
+              <span>➤</span>
+            </button>
+          </form>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 2: BLOOD BANK RECORD & LIVE INVENTORY COLUMN (NEW!) -->
+    <!-- ============================================================== -->
+    <div id="view-bloodbank" class="view-panel hidden transition-opacity duration-300 space-y-6">
+      
+      <!-- Explanatory Header -->
+      <div class="text-center max-w-2xl mx-auto">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-950/80 border border-rose-500/40 text-rose-300 text-xs font-bold mb-3">
+          <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <span>Verified Lucknow Transfusion Network • 24x7 Active</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          Lucknow Blood Bank Record & Donor Directory
+        </h2>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">
+          Instant access to verified units across KGMU, RMLIMS, SGPGIMS, Balrampur, and Red Cross. Filter by group or submit an urgent blood requisition.
+        </p>
+      </div>
+
+      <!-- Quick Blood Group Filters & Emergency Action -->
+      <div class="flex items-center justify-between gap-3 flex-wrap bg-slate-950/70 p-3 rounded-2xl border border-slate-800">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs font-bold text-slate-400 mr-1">Blood Group:</span>
+          <button onclick="app.filterBloodGroup('all')" data-group="all" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white shadow-md">All</button>
+          <button onclick="app.filterBloodGroup('O+')" data-group="O+" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800">O+</button>
+          <button onclick="app.filterBloodGroup('O-')" data-group="O-" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800">O-</button>
+          <button onclick="app.filterBloodGroup('A+')" data-group="A+" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800">A+</button>
+          <button onclick="app.filterBloodGroup('A-')" data-group="A-" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800">A-</button>
+          <button onclick="app.filterBloodGroup('B+')" data-group="B+" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800">B+</button>
+          <button onclick="app.filterBloodGroup('B-')" data-group="B-" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800">B-</button>
+          <button onclick="app.filterBloodGroup('AB+')" data-group="AB+" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800">AB+</button>
+          <button onclick="app.filterBloodGroup('AB-')" data-group="AB-" class="blood-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/80 text-slate-300 hover:text-white border border-slate-800">AB-</button>
+        </div>
+
+        <button onclick="app.openBloodRequestModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2">
+          <span>🚨</span>
+          <span>Submit Emergency Blood Requisition</span>
+        </button>
+      </div>
+
+      <!-- Live Blood Banks Grid -->
+      <div id="blood-banks-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Dynamically rendered blood banks -->
+      </div>
+
+      <!-- Blood Compatibility Guide Matrix -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-3">
+        <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+          <span>🩸 Transfusion Compatibility Reference</span>
+          <span class="text-[11px] text-slate-400 font-normal">• Lucknow Medical Standard</span>
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+            <span class="font-bold text-rose-400 block text-sm">O- Negative</span>
+            <span class="text-slate-300 text-[11px]">Universal RBC Donor (Can donate to any blood group).</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+            <span class="font-bold text-cyan-400 block text-sm">AB+ Positive</span>
+            <span class="text-slate-300 text-[11px]">Universal Recipient (Can safely receive any blood group).</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+            <span class="font-bold text-emerald-400 block text-sm">B+ Positive</span>
+            <span class="text-slate-300 text-[11px]">Can donate to B+ and AB+; receives from B+, B-, O+, O-.</span>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
+            <span class="font-bold text-amber-400 block text-sm">A+ Positive</span>
+            <span class="text-slate-300 text-[11px]">Can donate to A+ and AB+; receives from A+, A-, O+, O-.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 3: 1800-AKESA-CARE MULTI-LANGUAGE VOICE HELPLINE -->
+    <!-- ============================================================== -->
+    <div id="view-helpline" class="view-panel hidden transition-opacity duration-300">
+      
+      <div class="max-w-4xl mx-auto">
+        
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-bold mb-3">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span>Inclusive Digital Healthcare for Non-Smartphone & Elderly Users</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            1800-AKESA-CARE Voice OPD Assistant (Lucknow)
+          </h2>
+          <p class="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto mt-2">
+            Call toll-free, select from 9 Indian languages, speak your symptoms to Dr. Robot, and receive an instant SMS OPD pass with Room Number.
+          </p>
+        </div>
+
+        <!-- Phone Handset Simulator Frame -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          
+          <div class="md:col-span-6 flex justify-center">
+            <div class="w-[320px] sm:w-[350px] bg-slate-950 rounded-[48px] p-4 shadow-2xl border-4 border-slate-700 relative overflow-hidden">
+              
+              <!-- Phone Notch -->
+              <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-28 h-5 bg-black rounded-b-xl flex items-center justify-center gap-2 z-20">
+                <div class="w-10 h-1 bg-slate-700 rounded-full"></div>
+                <div class="w-2.5 h-2.5 bg-slate-800 rounded-full"></div>
+              </div>
+
+              <!-- Phone Screen -->
+              <div class="bg-gradient-to-b from-slate-950 via-slate-900 to-cyan-950 text-white rounded-[38px] p-5 pt-10 min-h-[570px] flex flex-col justify-between relative overflow-hidden border border-slate-800">
+                
+                <div class="text-center z-10">
+                  <div class="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-tr from-cyan-600 to-emerald-500 p-1 shadow-lg shadow-cyan-500/20 mb-2 flex items-center justify-center">
+                    <span class="text-3xl">🤖🩺</span>
+                  </div>
+                  <h4 class="text-base font-bold text-white">Dr. Akesa Voice Helpline</h4>
+                  <p class="text-xs text-cyan-400 font-mono">1800-253-7222 (Toll Free Lucknow)</p>
+                  <p class="text-xs text-slate-400 mt-1 font-mono" id="call-timer">00:00</p>
+                </div>
+
+                <!-- Call Active Waveform Visualizer -->
+                <div class="my-4 text-center z-10">
+                  <div id="call-waveform" class="flex items-center justify-center gap-1.5 h-10">
+                    <div class="w-1.5 bg-cyan-400 rounded-full h-2 animate-pulse"></div>
+                    <div class="w-1.5 bg-cyan-400 rounded-full h-5 animate-pulse" style="animation-delay: 0.2s"></div>
+                    <div class="w-1.5 bg-emerald-400 rounded-full h-8 animate-pulse" style="animation-delay: 0.1s"></div>
+                    <div class="w-1.5 bg-emerald-400 rounded-full h-3 animate-pulse" style="animation-delay: 0.3s"></div>
+                    <div class="w-1.5 bg-cyan-400 rounded-full h-6 animate-pulse" style="animation-delay: 0.15s"></div>
+                  </div>
+                  <!-- Subtitles box -->
+                  <div id="call-subtitles" class="mt-3 px-3 py-2.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-cyan-200 leading-relaxed min-h-[64px] flex items-center justify-center text-center">
+                    "Welcome to Akesa Health Lucknow. Please press 1 for English or 2 for हिन्दी."
+                  </div>
+                </div>
+
+                <!-- 9-Language Dialpad Grid -->
+                <div class="z-10">
+                  <span class="text-[10px] text-slate-400 block text-center mb-1 font-bold">Select Language (1-9):</span>
+                  <div id="helpline-keypad" class="grid grid-cols-3 gap-2 mb-4">
+                    <!-- Keypad buttons 1 to 9 -->
+                  </div>
+
+                  <!-- Call Controls -->
+                  <div class="flex items-center justify-around">
+                    <button onclick="app.toggleVoiceInput()" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center border border-slate-700 transition-colors" title="Speak into Call">
+                      <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                    </button>
+
+                    <button onclick="app.toggleHelplineCall()" id="main-call-btn" class="w-16 h-16 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-transform active:scale-90">
+                      <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 4V3z"/></svg>
+                    </button>
+
+                    <button onclick="app.sound.playDtmfTone('5')" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center border border-slate-700 transition-colors" title="DTMF Sound">
+                      <svg class="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Explanatory Right Card -->
+          <div class="md:col-span-6 space-y-4">
+            <div class="glass-panel rounded-3xl p-6 border border-cyan-500/25 space-y-4 shadow-xl">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <span>🌐 Multi-Language IVR Guidance</span>
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Patients without smartphone internet can dial toll-free <strong class="text-cyan-400">1800-253-7222</strong> from any basic feature phone.
+              </p>
+              
+              <div class="space-y-2 text-xs">
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                  <span class="text-slate-300 font-bold">1: English • 2: हिन्दी (Hindi)</span>
+                  <span class="text-cyan-400 font-mono">Official State</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                  <span class="text-slate-300 font-bold">3: اردو (Urdu) • 4: अवधी (Awadhi Lucknow)</span>
+                  <span class="text-cyan-400 font-mono">Regional Dialects</span>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                  <span class="text-slate-300 font-bold">5: भोजपुरी • 6: বাংলা • 7: தமிழ் • 8: తెలుగు • 9: ਪੰਜਾਬੀ</span>
+                  <span class="text-cyan-400 font-mono">Pan-India Support</span>
+                </div>
+              </div>
+
+              <!-- SMS Notification Bar (Simulated Output) -->
+              <div id="sms-notification-bar" class="hidden p-3 rounded-xl bg-cyan-950/90 border border-cyan-500/40 text-xs text-cyan-200">
+                <span class="font-bold block text-cyan-400 mb-1">📩 Simulated SMS Received:</span>
+                <p id="sms-text-content" class="font-mono text-[11px]"></p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 4: LUCKNOW HOSPITALS DIRECTORY -->
+    <!-- ============================================================== -->
+    <div id="view-hospitals" class="view-panel hidden transition-opacity duration-300 space-y-6">
+      
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-2xl font-black text-white">Verified Lucknow Medical Directory</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Government Medical Colleges, Apex Institutes & Civil Hospitals</p>
+        </div>
+        <button onclick="app.openLocalityModal()" class="px-3.5 py-2 rounded-xl bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-xs font-bold hover:bg-cyan-900 transition-colors">
+          📍 Recalculate Distances from my Locality
+        </button>
+      </div>
+
+      <div id="hospitals-list-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Dynamically rendered hospital cards -->
+      </div>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 5: RECEPTION & QUEUE CHECK-IN DESK -->
+    <!-- ============================================================== -->
+    <div id="view-admin" class="view-panel hidden transition-opacity duration-300 space-y-6">
+      
+      <div class="glass-panel rounded-3xl p-6 border border-cyan-500/25 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h2 class="text-xl font-bold text-white">Reception Desk & Queue Verification</h2>
+            <p class="text-xs text-slate-400">Search patient token or reference ID to confirm arrival at OPD counter.</p>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <input 
+              type="text" 
+              id="admin-qr-input" 
+              class="glass-input rounded-xl px-3 py-2 text-xs uppercase font-mono w-48 text-white" 
+              placeholder="e.g. AK-102 or APT-10821" 
+            />
+            <button onclick="app.searchAdminAppointment()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-colors">
+              Search
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-[11px] text-slate-400 uppercase tracking-wider">
+                <th class="p-3">Token</th>
+                <th class="p-3">Patient</th>
+                <th class="p-3">Doctor</th>
+                <th class="p-3">Room</th>
+                <th class="p-3">Slot</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-appointments-tbody">
+              <!-- Dynamically populated appointments -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- MODALS -->
+  <!-- ============================================================== -->
+
+  <!-- 1. OPD BOOKING MODAL -->
+  <div id="booking-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel-elevated rounded-3xl p-6 max-w-md w-full border border-cyan-500/40 shadow-2xl space-y-4 text-white">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <h3 id="book-modal-doctor-name" class="font-extrabold text-base text-white">Book OPD Token</h3>
+          <p id="book-modal-sub" class="text-xs text-cyan-300 font-semibold"></p>
+        </div>
+        <button onclick="app.closeBookingModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+
+      <form onsubmit="app.handleBookingSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Patient Full Name *</label>
+          <input type="text" id="book-input-name" required class="w-full glass-input rounded-xl px-3 py-2 text-white" placeholder="e.g. Rameshwar Dayal" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Patient Age</label>
+            <input type="number" id="book-input-age" value="38" class="w-full glass-input rounded-xl px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Phone Number</label>
+            <input type="tel" id="book-input-phone" value="+91 94500 12345" class="w-full glass-input rounded-xl px-3 py-2 text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Select Available Slot</label>
+          <div id="book-slots-container" class="grid grid-cols-3 gap-2"></div>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="app.closeBookingModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-slate-300 transition-colors">
+            Cancel
+          </button>
+          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-bold shadow-md transition-all">
+            Confirm Token & Pass
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. DIGITAL VISIT PASS MODAL -->
+  <div id="pass-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div id="pass-modal-inner" class="glass-panel-elevated rounded-3xl p-6 max-w-lg w-full border border-cyan-500/40 shadow-2xl space-y-4 text-white">
+      
+      <!-- Pass Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🩺</span>
+          <div>
+            <h3 class="font-black text-sm text-white uppercase tracking-wider">AKESA Digital OPD Visit Pass</h3>
+            <span class="text-[10px] text-emerald-400 font-bold">● Official Demonstration Pass</span>
+          </div>
+        </div>
+        <button onclick="app.closePassModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center no-print">✕</button>
+      </div>
+
+      <!-- Token Badge & Patient Info -->
+      <div class="flex items-center justify-between gap-4 p-4 rounded-2xl bg-slate-950/80 border border-slate-800">
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase tracking-wider block">OPD Token Number</span>
+          <span id="pass-token-badge" class="font-mono text-2xl font-black text-cyan-400">AK-102</span>
+          <div class="text-xs text-white font-bold mt-1" id="pass-patient-name">Rameshwar Dayal</div>
+        </div>
+        
+        <!-- Scannable QR -->
+        <div id="qrcode-container" class="bg-white p-2 rounded-xl flex items-center justify-center shadow-md"></div>
+      </div>
+
+      <!-- Clinical Location Details -->
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <span class="text-slate-400 block text-[10px]">Doctor</span>
+          <span id="pass-doctor-name" class="font-bold text-white">Dr. Aarav Mehrotra</span>
+          <span id="pass-hospital-name" class="block text-[10px] text-cyan-300 mt-0.5">KGMU Lucknow</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <span class="text-slate-400 block text-[10px]">Room & Floor</span>
+          <span id="pass-room-number" class="font-bold text-cyan-300">Room 204</span>
+          <span id="pass-floor" class="block text-[10px] text-slate-300 mt-0.5">2nd Floor</span>
+        </div>
+      </div>
+
+      <!-- Step-by-Step Wayfinding on Pass -->
+      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
+        <span class="text-cyan-300 font-bold block mb-1">🗺️ How to Reach Room:</span>
+        <p id="pass-wayfinding-text" class="text-slate-300 text-[11px] leading-relaxed font-mono"></p>
+      </div>
+
+      <!-- Pre-visit preparation checklist -->
+      <div class="text-[11px] text-slate-400 space-y-1">
+        <div class="font-bold text-slate-300">Pre-Visit Checklist:</div>
+        <div>✓ Bring previous prescriptions & Ayushman (PM-JAY) card if applicable</div>
+        <div>✓ Arrive 15 minutes before slot for blood pressure & vitals check</div>
+      </div>
+
+      <!-- Pass Actions -->
+      <div class="pt-2 flex gap-2 no-print">
+        <button onclick="app.speakPassDetails()" class="flex-1 py-2.5 rounded-xl bg-cyan-950 hover:bg-cyan-900 border border-cyan-500/40 font-bold text-xs text-cyan-300 flex items-center justify-center gap-1.5 transition-colors">
+          <span>🔊</span>
+          <span>पर्ची बोलकर सुनाएं / Listen</span>
+        </button>
+        <button onclick="app.printPass()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-bold text-xs shadow-md flex items-center justify-center gap-1.5 transition-all">
+          <span>🖨️</span>
+          <span>Save & Print Pass</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. EMERGENCY BLOOD REQUISITION MODAL -->
+  <div id="blood-request-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel-elevated rounded-3xl p-6 max-w-md w-full border border-rose-500/40 shadow-2xl space-y-4 text-white">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🚨</span>
+          <div>
+            <h3 class="font-extrabold text-sm text-white">Emergency Blood Requisition</h3>
+            <span class="text-[10px] text-rose-300">Lucknow Medical District Transfusion Network</span>
+          </div>
+        </div>
+        <button onclick="app.closeBloodRequestModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+
+      <form onsubmit="app.handleBloodRequestSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Patient Full Name *</label>
+          <input type="text" id="bld-req-name" required class="w-full glass-input rounded-xl px-3 py-2 text-white" placeholder="e.g. Smt. Sunita Sharma" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Contact Phone *</label>
+            <input type="tel" id="bld-req-phone" required class="w-full glass-input rounded-xl px-3 py-2 text-white" value="+91 94150 11223" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Required Blood Group *</label>
+            <select id="bld-req-group" class="w-full glass-input rounded-xl px-3 py-2 text-white bg-slate-900">
+              <option value="O+">O+ Positive</option>
+              <option value="O-">O- Negative (Universal)</option>
+              <option value="A+">A+ Positive</option>
+              <option value="A-">A- Negative</option>
+              <option value="B+">B+ Positive</option>
+              <option value="B-">B- Negative</option>
+              <option value="AB+">AB+ Positive</option>
+              <option value="AB-">AB- Negative</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Units Required</label>
+            <input type="number" id="bld-req-units" min="1" max="6" value="2" class="w-full glass-input rounded-xl px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Destination Hospital</label>
+            <select id="bld-req-hospital" class="w-full glass-input rounded-xl px-3 py-2 text-white bg-slate-900">
+              <option value="King George's Medical University (KGMU)">KGMU Chowk</option>
+              <option value="Dr. Ram Manohar Lohia Institute (RMLIMS)">RMLIMS Gomti Nagar</option>
+              <option value="Balrampur District Civil Hospital">Balrampur Hospital</option>
+              <option value="SGPGIMS Lucknow">SGPGIMS Raebareli Rd</option>
+              <option value="Civil Hospital Hazratganj">Civil Hospital Hazratganj</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="text-[10px] text-amber-300 leading-relaxed bg-amber-950/40 p-2.5 rounded-xl border border-amber-800/40">
+          ⚠️ Note: As per National Blood Transfusion Council norms, a valid doctor requisition slip with patient sample cross-matching is required at the blood bank counter.
+        </p>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="app.closeBloodRequestModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-slate-300">
+            Cancel
+          </button>
+          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 text-white font-bold shadow-md">
+            Submit Requisition
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. LOCALITY SELECTOR MODAL -->
+  <div id="locality-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel-elevated rounded-3xl p-6 max-w-sm w-full border border-cyan-500/40 shadow-2xl space-y-4 text-white">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="font-extrabold text-sm text-white">Select Your Lucknow Zone</h3>
+        <button onclick="app.closeLocalityModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+      <p class="text-xs text-slate-400">Recalculates accurate transit distance to KGMU, RMLIMS, Balrampur, and PGI.</p>
+      <div id="locality-options-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- FLOATING QUICK-SUMMON ROBOT BUTTON -->
+  <div id="floating-robot-btn" class="fixed bottom-6 right-6 z-40 no-print">
+    <button onclick="app.switchTab('chat'); app.mascot.react()" class="w-14 h-14 rounded-full bg-gradient-to-tr from-cyan-500 to-emerald-500 p-0.5 shadow-2xl shadow-cyan-500/40 flex items-center justify-center transition-transform hover:scale-110 active:scale-95 group">
+      <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center text-2xl group-hover:bg-slate-900 transition-colors">
+        🤖
+      </div>
+    </button>
+  </div>
+
+  <!-- PROFESSIONAL ACCESSIBLE FOOTER -->
+  <footer class="mt-auto bg-slate-950 text-slate-400 py-8 px-4 border-t border-slate-800/80 text-xs z-10">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+      <div>
+        <div class="flex items-center gap-2 text-white font-bold text-sm">
+          <span>🤖 AKESA AI Healthcare Assistant</span>
+          <span class="text-[10px] text-cyan-400 font-mono">v2.0 Lucknow</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-1">
+          Autonomous OPD Triage, Department Wayfinding & Verified Blood Bank Management.
+        </p>
+      </div>
+
+      <div class="text-center text-[11px] text-slate-400 space-y-1">
+        <span class="font-bold text-slate-300">24x7 Lucknow Verified Helplines:</span>
+        <div>National Ambulance: <a href="tel:108" class="text-cyan-400 font-bold hover:underline">108</a> • National Emergency: <a href="tel:112" class="text-cyan-400 font-bold hover:underline">112</a></div>
+        <div>KGMU Trauma: <a href="tel:05222257540" class="text-cyan-400 font-mono hover:underline">0522-2257540</a> • Balrampur: <a href="tel:05222224011" class="text-cyan-400 font-mono hover:underline">0522-2224011</a></div>
+      </div>
+
+      <div class="text-right text-[10px] text-slate-500 leading-relaxed">
+        <strong>Medical Disclaimer:</strong> AKESA is an administrative and navigational guidance system. It does not provide medical diagnoses or prescribe pharmaceuticals. In acute emergencies, visit the nearest emergency casualty ward immediately.
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT SUBSYSTEMS -->
+  <script src="js/data.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/mascot.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
